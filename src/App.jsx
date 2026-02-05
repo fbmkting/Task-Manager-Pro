@@ -295,6 +295,62 @@ function App() {
     }
   };
 
+  // NUOVE FUNZIONI PER SPOSTARE TAB
+  const moveTabLeft = (index) => {
+    if (index === 0) return; // GiÃ  il primo
+    
+    setTabs(prev => {
+      const newTabs = [...prev];
+      [newTabs[index - 1], newTabs[index]] = [newTabs[index], newTabs[index - 1]];
+      return newTabs;
+    });
+  };
+
+  const moveTabRight = (index) => {
+    if (index === tabs.length - 1) return; // GiÃ  l'ultimo
+    
+    setTabs(prev => {
+      const newTabs = [...prev];
+      [newTabs[index], newTabs[index + 1]] = [newTabs[index + 1], newTabs[index]];
+      return newTabs;
+    });
+  };
+
+  // NUOVE FUNZIONI PER SPOSTARE TASK
+  const moveTaskUp = (taskId) => {
+    setTasks(prev => {
+      const tabTasks = prev[activeTab] || [];
+      const index = tabTasks.findIndex(t => t.id === taskId);
+      
+      if (index <= 0) return prev; // GiÃ  il primo o non trovato
+      
+      const newTabTasks = [...tabTasks];
+      [newTabTasks[index - 1], newTabTasks[index]] = [newTabTasks[index], newTabTasks[index - 1]];
+      
+      return {
+        ...prev,
+        [activeTab]: newTabTasks
+      };
+    });
+  };
+
+  const moveTaskDown = (taskId) => {
+    setTasks(prev => {
+      const tabTasks = prev[activeTab] || [];
+      const index = tabTasks.findIndex(t => t.id === taskId);
+      
+      if (index === -1 || index === tabTasks.length - 1) return prev; // GiÃ  l'ultimo o non trovato
+      
+      const newTabTasks = [...tabTasks];
+      [newTabTasks[index], newTabTasks[index + 1]] = [newTabTasks[index + 1], newTabTasks[index]];
+      
+      return {
+        ...prev,
+        [activeTab]: newTabTasks
+      };
+    });
+  };
+
   const getUrgentCount = (tabId) => {
     const tabTasks = tasks[tabId] || [];
     return tabTasks.filter(task => !task.archived && task.tags.includes('urgente')).length;
@@ -380,8 +436,36 @@ function App() {
               </h3>
               
               <div className="space-y-3">
-                {tabs.map(tab => (
+                {tabs.map((tab, index) => (
                   <div key={tab.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    {/* Frecce per spostare */}
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => moveTabLeft(index)}
+                        disabled={index === 0}
+                        className={`p-1 rounded transition-colors ${
+                          index === 0 
+                            ? 'text-gray-300 cursor-not-allowed' 
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title="Sposta a sinistra"
+                      >
+                        <span className="text-sm font-bold">â—„</span>
+                      </button>
+                      <button
+                        onClick={() => moveTabRight(index)}
+                        disabled={index === tabs.length - 1}
+                        className={`p-1 rounded transition-colors ${
+                          index === tabs.length - 1 
+                            ? 'text-gray-300 cursor-not-allowed' 
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title="Sposta a destra"
+                      >
+                        <span className="text-sm font-bold">â–º</span>
+                      </button>
+                    </div>
+
                     {editingTabId === tab.id ? (
                       // ModalitÃ  Modifica Tab
                       <>
@@ -534,7 +618,7 @@ function App() {
               </p>
             </div>
           ) : (
-            currentTasks.map(task => {
+            currentTasks.map((task, taskIndex) => {
               const isExpanded = expandedTasks[task.id];
               const dueDateStatus = getDueDateStatus(task.dueDate);
               const priorityInfo = priorities.find(p => p.id === task.priority);
@@ -610,6 +694,34 @@ function App() {
                                     <Edit2 size={16} />
                                   </button>
                                 )}
+
+                                {/* Frecce per spostare task */}
+                                <div className="flex flex-col gap-0.5">
+                                  <button
+                                    onClick={() => moveTaskUp(task.id)}
+                                    disabled={taskIndex === 0}
+                                    className={`p-0.5 rounded transition-colors ${
+                                      taskIndex === 0 
+                                        ? 'text-gray-300 cursor-not-allowed' 
+                                        : 'text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                    title="Sposta su"
+                                  >
+                                    <span className="text-xs font-bold">â–²</span>
+                                  </button>
+                                  <button
+                                    onClick={() => moveTaskDown(task.id)}
+                                    disabled={taskIndex === currentTasks.length - 1}
+                                    className={`p-0.5 rounded transition-colors ${
+                                      taskIndex === currentTasks.length - 1 
+                                        ? 'text-gray-300 cursor-not-allowed' 
+                                        : 'text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                    title="Sposta giÃ¹"
+                                  >
+                                    <span className="text-xs font-bold">â–¼</span>
+                                  </button>
+                                </div>
 
                                 {priorityInfo && (
                                   <span 
