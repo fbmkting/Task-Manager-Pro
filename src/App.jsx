@@ -35,9 +35,9 @@ function App() {
   ];
 
   const priorities = [
-    { id: 'alta', label: 'Alta', color: '#DC2626', icon: 'ðŸ”´' },
-    { id: 'media', label: 'Media', color: '#F59E0B', icon: 'ðŸŸ¡' },
-    { id: 'bassa', label: 'Bassa', color: '#10B981', icon: 'ðŸŸ¢' },
+    { id: 'alta', label: 'Alta', color: '#DC2626', icon: 'â—' },
+    { id: 'media', label: 'Media', color: '#F59E0B', icon: 'â—' },
+    { id: 'bassa', label: 'Bassa', color: '#10B981', icon: 'â—' },
   ];
 
   // Carica i dati dal localStorage al mount
@@ -329,7 +329,7 @@ function App() {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">ðŸ“‹ Task Manager Pro</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Task Manager Pro</h1>
             <button
               onClick={() => setShowSettings(!showSettings)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -339,7 +339,7 @@ function App() {
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-2">
             {tabs.map(tab => {
               const urgentCount = getUrgentCount(tab.id);
               return (
@@ -353,11 +353,12 @@ function App() {
                   }`}
                   style={{
                     backgroundColor: activeTab === tab.id ? tab.color : undefined,
+                    marginTop: urgentCount > 0 ? '8px' : '0',
                   }}
                 >
                   {tab.name}
                   {urgentCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-white shadow-md">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[24px] h-6 flex items-center justify-center px-1.5 border-2 border-white shadow-md z-10">
                       {urgentCount}
                     </span>
                   )}
@@ -375,7 +376,7 @@ function App() {
             {/* Sezione Gestione Tab */}
             <div>
               <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                ðŸ“ Gestione Tab
+                Gestione Tab
               </h3>
               
               <div className="space-y-3">
@@ -611,7 +612,11 @@ function App() {
                                 )}
 
                                 {priorityInfo && (
-                                  <span className="text-lg" title={`PrioritÃ  ${priorityInfo.label}`}>
+                                  <span 
+                                    className="text-2xl leading-none" 
+                                    style={{ color: priorityInfo.color }}
+                                    title={`PrioritÃ  ${priorityInfo.label}`}
+                                  >
                                     {priorityInfo.icon}
                                   </span>
                                 )}
