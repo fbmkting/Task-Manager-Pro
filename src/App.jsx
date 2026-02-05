@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, Eye, EyeOff, Trash2, Settings, Palette, ChevronDown, ChevronUp, Calendar, AlertCircle, Edit2, X } from 'lucide-react';
+import { Plus, Check, Eye, EyeOff, Trash2, Settings, Palette, ChevronDown, ChevronUp, Calendar, AlertCircle, Edit2, X, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 
 function App() {
   // TAB INIZIALI - Questi sono i 7 tab di default
@@ -35,9 +35,9 @@ function App() {
   ];
 
   const priorities = [
-    { id: 'alta', label: 'Alta', color: '#DC2626', icon: 'â—' },
-    { id: 'media', label: 'Media', color: '#F59E0B', icon: 'â—' },
-    { id: 'bassa', label: 'Bassa', color: '#10B981', icon: 'â—' },
+    { id: 'alta', label: 'Alta', color: '#DC2626' },
+    { id: 'media', label: 'Media', color: '#F59E0B' },
+    { id: 'bassa', label: 'Bassa', color: '#10B981' },
   ];
 
   // Carica i dati dal localStorage al mount
@@ -297,7 +297,7 @@ function App() {
 
   // NUOVE FUNZIONI PER SPOSTARE TAB
   const moveTabLeft = (index) => {
-    if (index === 0) return; // GiÃ  il primo
+    if (index === 0) return; // Gia il primo
     
     setTabs(prev => {
       const newTabs = [...prev];
@@ -307,7 +307,7 @@ function App() {
   };
 
   const moveTabRight = (index) => {
-    if (index === tabs.length - 1) return; // GiÃ  l'ultimo
+    if (index === tabs.length - 1) return; // Gia l'ultimo
     
     setTabs(prev => {
       const newTabs = [...prev];
@@ -322,7 +322,7 @@ function App() {
       const tabTasks = prev[activeTab] || [];
       const index = tabTasks.findIndex(t => t.id === taskId);
       
-      if (index <= 0) return prev; // GiÃ  il primo o non trovato
+      if (index <= 0) return prev; // Gia il primo o non trovato
       
       const newTabTasks = [...tabTasks];
       [newTabTasks[index - 1], newTabTasks[index]] = [newTabTasks[index], newTabTasks[index - 1]];
@@ -339,7 +339,7 @@ function App() {
       const tabTasks = prev[activeTab] || [];
       const index = tabTasks.findIndex(t => t.id === taskId);
       
-      if (index === -1 || index === tabTasks.length - 1) return prev; // GiÃ  l'ultimo o non trovato
+      if (index === -1 || index === tabTasks.length - 1) return prev; // Gia l'ultimo o non trovato
       
       const newTabTasks = [...tabTasks];
       [newTabTasks[index], newTabTasks[index + 1]] = [newTabTasks[index + 1], newTabTasks[index]];
@@ -450,7 +450,7 @@ function App() {
                         }`}
                         title="Sposta a sinistra"
                       >
-                        <span className="text-sm font-bold">â—„</span>
+                        <ArrowLeft size={16} />
                       </button>
                       <button
                         onClick={() => moveTabRight(index)}
@@ -462,12 +462,12 @@ function App() {
                         }`}
                         title="Sposta a destra"
                       >
-                        <span className="text-sm font-bold">â–º</span>
+                        <ArrowRight size={16} />
                       </button>
                     </div>
 
                     {editingTabId === tab.id ? (
-                      // ModalitÃ  Modifica Tab
+                      // Modalita Modifica Tab
                       <>
                         <input
                           type="text"
@@ -496,7 +496,7 @@ function App() {
                         </button>
                       </>
                     ) : (
-                      // ModalitÃ  Visualizzazione Tab
+                      // Modalita Visualizzazione Tab
                       <>
                         <span className="text-sm text-gray-700 font-medium flex-1">{tab.name}</span>
                         <input
@@ -649,7 +649,7 @@ function App() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           {editingTaskId === task.id ? (
-                            // ModalitÃ  Modifica
+                            // Modalita Modifica
                             <div className="flex-1 flex items-center gap-2">
                               <input
                                 type="text"
@@ -678,7 +678,7 @@ function App() {
                               </button>
                             </div>
                           ) : (
-                            // ModalitÃ  Visualizzazione
+                            // Modalita Visualizzazione
                             <>
                               <p className={`text-gray-800 flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
                                 {task.text}
@@ -707,7 +707,7 @@ function App() {
                                     }`}
                                     title="Sposta su"
                                   >
-                                    <span className="text-xs font-bold">â–²</span>
+                                    <ArrowUp size={14} />
                                   </button>
                                   <button
                                     onClick={() => moveTaskDown(task.id)}
@@ -717,20 +717,18 @@ function App() {
                                         ? 'text-gray-300 cursor-not-allowed' 
                                         : 'text-gray-600 hover:bg-gray-200'
                                     }`}
-                                    title="Sposta giÃ¹"
+                                    title="Sposta giu"
                                   >
-                                    <span className="text-xs font-bold">â–¼</span>
+                                    <ArrowDown size={14} />
                                   </button>
                                 </div>
 
                                 {priorityInfo && (
                                   <span 
-                                    className="text-2xl leading-none" 
-                                    style={{ color: priorityInfo.color }}
-                                    title={`PrioritÃ  ${priorityInfo.label}`}
-                                  >
-                                    {priorityInfo.icon}
-                                  </span>
+                                    className="w-3 h-3 rounded-sm" 
+                                    style={{ backgroundColor: priorityInfo.color }}
+                                    title={`Priorita ${priorityInfo.label}`}
+                                  />
                                 )}
 
                                 {dueDateStatus && (
@@ -792,13 +790,13 @@ function App() {
                     <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-4">
                       {/* Priority Selection */}
                       <div>
-                        <label className="text-sm font-semibold text-gray-700 mb-2 block">PrioritÃ </label>
+                        <label className="text-sm font-semibold text-gray-700 mb-2 block">Priorita</label>
                         <div className="flex gap-2 flex-wrap">
                           {priorities.map(priority => (
                             <button
                               key={priority.id}
                               onClick={() => setPriority(task.id, priority.id)}
-                              className={`px-3 py-1.5 text-sm rounded transition-all flex items-center gap-1 ${
+                              className={`px-3 py-1.5 text-sm rounded transition-all flex items-center gap-2 ${
                                 task.priority === priority.id
                                   ? 'text-white font-semibold shadow-sm'
                                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -807,7 +805,12 @@ function App() {
                                 backgroundColor: task.priority === priority.id ? priority.color : undefined,
                               }}
                             >
-                              <span>{priority.icon}</span>
+                              <span 
+                                className="w-2.5 h-2.5 rounded-full" 
+                                style={{ 
+                                  backgroundColor: task.priority === priority.id ? 'white' : priority.color 
+                                }}
+                              />
                               {priority.label}
                             </button>
                           ))}
