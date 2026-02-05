@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, Eye, EyeOff, Trash2, Settings, Palette, ChevronDown, ChevronUp, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Check, Eye, EyeOff, Trash2, Settings, Palette, ChevronDown, ChevronUp, Calendar, AlertCircle, Edit2, X } from 'lucide-react';
 
 function App() {
-  // TAB FISSI - Questi sono i 7 tab richiesti
-  const FIXED_TABS = [
+  // TAB INIZIALI - Questi sono i 7 tab di default
+  const DEFAULT_TABS = [
     { id: 'personale', name: 'Personale', color: '#3B82F6' },
     { id: 'famiglia', name: 'Famiglia', color: '#EC4899' },
     { id: 'confsalfisals', name: 'ConfsalFisals', color: '#8B5CF6' },
@@ -13,13 +13,19 @@ function App() {
     { id: 'libretti', name: 'Libretti', color: '#06B6D4' },
   ];
 
-  const [tabs, setTabs] = useState(FIXED_TABS);
+  const [tabs, setTabs] = useState(DEFAULT_TABS);
   const [activeTab, setActiveTab] = useState('personale');
   const [tasks, setTasks] = useState({});
   const [newTaskText, setNewTaskText] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editingTaskText, setEditingTaskText] = useState('');
+  const [newTabName, setNewTabName] = useState('');
+  const [showNewTabInput, setShowNewTabInput] = useState(false);
+  const [editingTabId, setEditingTabId] = useState(null);
+  const [editingTabName, setEditingTabName] = useState('');
 
   const tags = [
     { id: 'urgente', label: 'URGENTE', color: '#EF4444' },
@@ -29,9 +35,9 @@ function App() {
   ];
 
   const priorities = [
-    { id: 'alta', label: 'Alta', color: '#DC2626', icon: '🔴' },
-    { id: 'media', label: 'Media', color: '#F59E0B', icon: '🟡' },
-    { id: 'bassa', label: 'Bassa', color: '#10B981', icon: '🟢' },
+    { id: 'alta', label: 'Alta', color: '#DC2626', icon: 'ðŸ”´' },
+    { id: 'media', label: 'Media', color: '#F59E0B', icon: 'ðŸŸ¡' },
+    { id: 'bassa', label: 'Bassa', color: '#10B981', icon: 'ðŸŸ¢' },
   ];
 
   // Carica i dati dal localStorage al mount
@@ -192,6 +198,103 @@ function App() {
     }));
   };
 
+  // NUOVE FUNZIONI PER MODIFICARE TASK
+  const startEditingTask = (taskId, currentText) => {
+    setEditingTaskId(taskId);
+    setEditingTaskText(currentText);
+  };
+
+  const cancelEditingTask = () => {
+    setEditingTaskId(null);
+    setEditingTaskText('');
+  };
+
+  const saveTaskEdit = (taskId) => {
+    if (!editingTaskText.trim()) {
+      cancelEditingTask();
+      return;
+    }
+
+    setTasks(prev => ({
+      ...prev,
+      [activeTab]: prev[activeTab].map(task =>
+        task.id === taskId ? { ...task, text: editingTaskText.trim() } : task
+      )
+    }));
+    
+    setEditingTaskId(null);
+    setEditingTaskText('');
+  };
+
+  // NUOVE FUNZIONI PER GESTIRE TAB
+  const addNewTab = () => {
+    if (!newTabName.trim()) return;
+
+    const newTab = {
+      id: `tab-${Date.now()}`,
+      name: newTabName.trim(),
+      color: '#6366F1'
+    };
+
+    setTabs(prev => [...prev, newTab]);
+    setNewTabName('');
+    setShowNewTabInput(false);
+    setActiveTab(newTab.id);
+  };
+
+  const startEditingTab = (tabId, currentName) => {
+    setEditingTabId(tabId);
+    setEditingTabName(currentName);
+  };
+
+  const cancelEditingTab = () => {
+    setEditingTabId(null);
+    setEditingTabName('');
+  };
+
+  const saveTabEdit = (tabId) => {
+    if (!editingTabName.trim()) {
+      cancelEditingTab();
+      return;
+    }
+
+    setTabs(prev => prev.map(tab =>
+      tab.id === tabId ? { ...tab, name: editingTabName.trim() } : tab
+    ));
+
+    setEditingTabId(null);
+    setEditingTabName('');
+  };
+
+  const deleteTab = (tabId) => {
+    if (tabs.length <= 1) {
+      alert('Non puoi eliminare l\'ultimo tab!');
+      return;
+    }
+
+    if (!window.confirm('Sei sicuro di voler eliminare questo tab? Tutti i task al suo interno verranno eliminati.')) {
+      return;
+    }
+
+    // Rimuovi il tab
+    setTabs(prev => prev.filter(tab => tab.id !== tabId));
+
+    // Rimuovi i task del tab
+    setTasks(prev => {
+      const newTasks = { ...prev };
+      delete newTasks[tabId];
+      return newTasks;
+    });
+
+    // Se il tab eliminato era attivo, passa al primo disponibile
+    if (activeTab === tabId) {
+      const remainingTabs = tabs.filter(tab => tab.id !== tabId);
+      if (remainingTabs.length > 0) {
+        setActiveTab(remainingTabs[0].id);
+      }
+    }
+  };
+
   const getUrgentCount = (tabId) => {
     const tabTasks = tasks[tabId] || [];
     return tabTasks.filter(task => !task.archived && task.tags.includes('urgente')).length;
@@ -226,7 +329,7 @@ function App() {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">📋 Task Manager Pro</h1>
+            <h1 className="text-2xl font-bold text-gray-800">ðŸ“‹ Task Manager Pro</h1>
             <button
               onClick={() => setShowSettings(!showSettings)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -268,24 +371,124 @@ function App() {
       {/* Settings Panel */}
       {showSettings && (
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <Palette size={18} />
-              Personalizza Colori Tab
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {tabs.map(tab => (
-                <div key={tab.id} className="flex items-center gap-3">
-                  <span className="text-sm text-gray-700 font-medium w-40">{tab.name}</span>
-                  <input
-                    type="color"
-                    value={tab.color}
-                    onChange={(e) => updateTabColor(tab.id, e.target.value)}
-                    className="w-12 h-10 rounded cursor-pointer border-2 border-gray-200"
-                  />
-                </div>
-              ))}
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 space-y-6">
+            {/* Sezione Gestione Tab */}
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                ðŸ“ Gestione Tab
+              </h3>
+              
+              <div className="space-y-3">
+                {tabs.map(tab => (
+                  <div key={tab.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    {editingTabId === tab.id ? (
+                      // ModalitÃ  Modifica Tab
+                      <>
+                        <input
+                          type="text"
+                          value={editingTabName}
+                          onChange={(e) => setEditingTabName(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') saveTabEdit(tab.id);
+                            if (e.key === 'Escape') cancelEditingTab();
+                          }}
+                          autoFocus
+                          className="flex-1 px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          onClick={() => saveTabEdit(tab.id)}
+                          className="p-2 text-green-600 hover:bg-green-100 rounded transition-colors"
+                          title="Salva"
+                        >
+                          <Check size={18} />
+                        </button>
+                        <button
+                          onClick={cancelEditingTab}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded transition-colors"
+                          title="Annulla"
+                        >
+                          <X size={18} />
+                        </button>
+                      </>
+                    ) : (
+                      // ModalitÃ  Visualizzazione Tab
+                      <>
+                        <span className="text-sm text-gray-700 font-medium flex-1">{tab.name}</span>
+                        <input
+                          type="color"
+                          value={tab.color}
+                          onChange={(e) => updateTabColor(tab.id, e.target.value)}
+                          className="w-12 h-10 rounded cursor-pointer border-2 border-gray-200"
+                          title="Cambia colore"
+                        />
+                        <button
+                          onClick={() => startEditingTab(tab.id, tab.name)}
+                          className="p-2 text-blue-500 hover:bg-blue-100 rounded transition-colors"
+                          title="Rinomina tab"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteTab(tab.id)}
+                          className="p-2 text-red-500 hover:bg-red-100 rounded transition-colors"
+                          title="Elimina tab"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {/* Input per nuovo tab */}
+                {showNewTabInput ? (
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
+                    <input
+                      type="text"
+                      value={newTabName}
+                      onChange={(e) => setNewTabName(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') addNewTab();
+                        if (e.key === 'Escape') {
+                          setShowNewTabInput(false);
+                          setNewTabName('');
+                        }
+                      }}
+                      placeholder="Nome del nuovo tab..."
+                      autoFocus
+                      className="flex-1 px-3 py-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addNewTab}
+                      className="p-2 bg-blue-500 text-white hover:bg-blue-600 rounded transition-colors"
+                      title="Aggiungi"
+                    >
+                      <Check size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowNewTabInput(false);
+                        setNewTabName('');
+                      }}
+                      className="p-2 bg-gray-300 text-gray-700 hover:bg-gray-400 rounded transition-colors"
+                      title="Annulla"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowNewTabInput(true)}
+                    className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+                  >
+                    <Plus size={20} />
+                    Aggiungi Nuovo Tab
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Sezione Colori Tab (vecchia) - RIMOSSA, ora Ã¨ nella sezione sopra */}
           </div>
         </div>
       )}
@@ -360,44 +563,88 @@ function App() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className={`text-gray-800 flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-                            {task.text}
-                          </p>
-                          
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {priorityInfo && (
-                              <span className="text-lg" title={`Priorità ${priorityInfo.label}`}>
-                                {priorityInfo.icon}
-                              </span>
-                            )}
+                          {editingTaskId === task.id ? (
+                            // ModalitÃ  Modifica
+                            <div className="flex-1 flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={editingTaskText}
+                                onChange={(e) => setEditingTaskText(e.target.value)}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter') saveTaskEdit(task.id);
+                                  if (e.key === 'Escape') cancelEditingTask();
+                                }}
+                                autoFocus
+                                className="flex-1 px-2 py-1 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              />
+                              <button
+                                onClick={() => saveTaskEdit(task.id)}
+                                className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                                title="Salva"
+                              >
+                                <Check size={18} />
+                              </button>
+                              <button
+                                onClick={cancelEditingTask}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                title="Annulla"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          ) : (
+                            // ModalitÃ  Visualizzazione
+                            <>
+                              <p className={`text-gray-800 flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
+                                {task.text}
+                              </p>
+                              
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {!task.completed && (
+                                  <button
+                                    onClick={() => startEditingTask(task.id, task.text)}
+                                    className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                                    title="Modifica task"
+                                  >
+                                    <Edit2 size={16} />
+                                  </button>
+                                )}
 
-                            {dueDateStatus && (
-                              <span className={`px-2 py-1 text-xs font-semibold rounded ${dueDateStatus.color} flex items-center gap-1`}>
-                                {dueDateStatus.status === 'overdue' && <AlertCircle size={12} />}
-                                {dueDateStatus.label}
-                              </span>
-                            )}
+                                {priorityInfo && (
+                                  <span className="text-lg" title={`PrioritÃ  ${priorityInfo.label}`}>
+                                    {priorityInfo.icon}
+                                  </span>
+                                )}
 
-                            {totalSubtasks > 0 && (
-                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {completedSubtasks}/{totalSubtasks}
-                              </span>
-                            )}
+                                {dueDateStatus && (
+                                  <span className={`px-2 py-1 text-xs font-semibold rounded ${dueDateStatus.color} flex items-center gap-1`}>
+                                    {dueDateStatus.status === 'overdue' && <AlertCircle size={12} />}
+                                    {dueDateStatus.label}
+                                  </span>
+                                )}
 
-                            <button
-                              onClick={() => toggleExpanded(task.id)}
-                              className="p-1 hover:bg-gray-100 rounded transition-colors"
-                            >
-                              {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                            </button>
+                                {totalSubtasks > 0 && (
+                                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                    {completedSubtasks}/{totalSubtasks}
+                                  </span>
+                                )}
 
-                            <button
-                              onClick={() => deleteTask(task.id)}
-                              className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
+                                <button
+                                  onClick={() => toggleExpanded(task.id)}
+                                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                                >
+                                  {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                </button>
+
+                                <button
+                                  onClick={() => deleteTask(task.id)}
+                                  className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </>
+                          )}
                         </div>
                         
                         {/* Tags */}
@@ -428,7 +675,7 @@ function App() {
                     <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-4">
                       {/* Priority Selection */}
                       <div>
-                        <label className="text-sm font-semibold text-gray-700 mb-2 block">Priorità</label>
+                        <label className="text-sm font-semibold text-gray-700 mb-2 block">PrioritÃ </label>
                         <div className="flex gap-2 flex-wrap">
                           {priorities.map(priority => (
                             <button
