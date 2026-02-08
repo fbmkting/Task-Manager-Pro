@@ -628,12 +628,12 @@ function App() {
               return (
                 <div
                   key={task.id}
-                  className={`rounded-lg shadow-sm border transition-all ${
+                  className={`rounded-lg shadow-sm border-2 transition-all ${
                     task.completed 
                       ? 'bg-gray-50 border-gray-200 opacity-75' 
-                      : task.tags?.includes('URGENTE')
-                        ? 'bg-red-50 border-red-200 hover:shadow-md'
-                        : 'bg-green-50 border-green-200 hover:shadow-md'
+                      : task.tags && task.tags.includes('urgente')
+                        ? 'bg-red-100 border-red-300 hover:shadow-md'
+                        : 'bg-green-100 border-green-300 hover:shadow-md'
                   }`}
                 >
                   {/* Main Task */}
