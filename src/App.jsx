@@ -90,11 +90,16 @@ function App() {
       ...prev,
       [activeTab]: prev[activeTab].map(task => {
         if (task.id === taskId) {
+          const newCompleted = !task.completed;
           const allSubtasksCompleted = task.subtasks.length === 0 || task.subtasks.every(st => st.completed);
-          const shouldArchive = !task.completed && allSubtasksCompleted;
+          
+          // Se lo stiamo completando E tutti i subtask sono completati -> archivia
+          // Se lo stiamo riaprendo -> rimuovi dall'archivio
+          const shouldArchive = newCompleted && allSubtasksCompleted;
+          
           return { 
             ...task, 
-            completed: !task.completed, 
+            completed: newCompleted, 
             archived: shouldArchive 
           };
         }
@@ -573,7 +578,7 @@ function App() {
               </div>
             </div>
 
-            {/* Sezione Colori Tab (vecchia) - RIMOSSA, ora Ã¨ nella sezione sopra */}
+            {/* Sezione Colori Tab (vecchia) - RIMOSSA, ora è nella sezione sopra */}
           </div>
         </div>
       )}
